@@ -28,7 +28,8 @@
   ],
   "scripts": {
     "dev": "gulp dev",
-    "dest": "gulp build"
+    "dest": "gulp build",
+    "deploy": "gulp deploy"
   },
   "author": "",
   "license": "ISC"

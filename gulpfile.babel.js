@@ -43,7 +43,7 @@ gulp
 .pipe(gpug())
 .pipe(gulp.dest(routes.pug.dest));
 
-const clean = () => del(["build"]);
+const clean = () => del(["build", ".publish"]);
 // 처음에 src(보여주고 싶은 폴더)를 찾고 localhost 서버를 연다.
 const webserver = () => gulp.src("build").pipe(ws({livereload: true, open: true}));
 
@@ -68,6 +68,7 @@ const js = () =>
     .pipe(bro({ transform: [babelify.configure({presets: ["@babel/preset-env"]}), ['uglifyify', {global: true}]]}))
     .pipe(gulp.dest(routes.js.dest));
 
+const ghDeploy = () => gulp.src("build/**/*").pipe(ghPages());
 // clean은  build를 준비시키는 기능을 하고
 // pug는 파일을 실제로 변경하는 일을 한다. 
 // 둘의 기능은 너무 다르기 때문에 분리하는 편이 가독성에 좋다.
@@ -86,10 +87,12 @@ const assets = gulp.series([pug, styles, js]);
 
 // 동시에 두 가지 task를 실행하기를 원한다면 parallel을 사용한다.
 // series는 순서대로 실행
-const postDev = gulp.parallel([webserver, watch]);
+const live = gulp.parallel([webserver, watch]);
+export const build = gulp.series([prepare, assets]);
 // export는 package json 에서 쓸 command 만 해주면 된다.
 // 만약 clean을 export 하지 않는다면, console이나 package json에서 사용할 수 없다.
-export const dev = gulp.series([prepare, assets, postDev]);
 
+export const dev = gulp.series([prepare, assets, live]);
+export const deploy = gulp.series([build, ghDeploy, clean]);
 
 // 지켜봐야 할 파일과 컴파일 해야 할 파일로 구분하기.
